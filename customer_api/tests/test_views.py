@@ -92,8 +92,28 @@ class UpdateCustomerTest(TestCase):
         self.assertEqual(response.data['status_code'], status.HTTP_200_OK)
 
     def should_return_error_when_update_customer_if_payload_is_invalid(self):
-        response = client.put(
+        response = client.patch(
             reverse('get_delete_update_customer', kwargs={'pk': self.first_customer.pk}),
             data=json.dumps(self.invalid_payload),
             content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteCustomerTest(TestCase):
+
+    def setUp(self):
+        self.first_customer = Customer.objects.create(
+            email='first@user.com', password='anyFirstPassword', first_name='anyFirstName', last_name='anyLastName')
+        self.second_customer = Customer.objects.create(
+            email='second@user.com', password='anySecondPassword', first_name='secondFirstName',
+            last_name='secondLastName')
+
+    def test_valid_delete_puppy(self):
+        response = client.delete(
+            reverse('get_delete_update_customer', kwargs={'pk': self.first_customer.pk}))
+        self.assertEqual(response.data['status_code'], status.HTTP_204_NO_CONTENT)
+
+    def test_invalid_delete_puppy(self):
+        response = client.delete(
+            reverse('get_delete_update_customer', kwargs={'pk': 30}))
+        self.assertEqual(response.data['status_code'], status.HTTP_404_NOT_FOUND)

@@ -1,6 +1,7 @@
 from customer_api.models import Customer
 from rest_framework import generics, status
 from django.http import Http404
+from django.core.exceptions import ValidationError
 
 from customer_api.serializer import CustomerSerializer
 from customer_api.serializer import CustomerListSerializer
