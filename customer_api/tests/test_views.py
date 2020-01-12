@@ -36,6 +36,20 @@ class ListCustomersTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
+class RegisterCustomerTest(TestCase):
+
+    def should_register_customer(self):
+        # get API response
+        response = self.client.post(reverse('register_customer'), {'email': 'any@mail.com', 'password': 'anyPass',
+                                                                   'first_name': 'anyFirstName',
+                                                                   'last_name': 'anyLastName'})
+        customer = Customer.objects.get(email='any@mail.com')
+        self.assertEqual(response.data['body']['email'], customer.email)
+        self.assertEqual(response.data['body']['first_name'], customer.first_name)
+        self.assertEqual(response.data['body']['last_name'], customer.last_name)
+        self.assertEqual(response.data['status_code'], status.HTTP_201_CREATED)
+
+
 class RetrieveCustomerTest(TestCase):
 
     def setUp(self):
