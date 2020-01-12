@@ -3,6 +3,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 
 from customer_api.serializer import CustomerSerializer
+from customer_api.serializer import CustomerListSerializer
 from customer_api.serializer import CustomerLoginSerializer
 
 import hashlib
@@ -43,7 +44,7 @@ class CustomerLogin(generics.GenericAPIView):
 
 class CustomerList(generics.ListAPIView):
     queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
+    serializer_class = CustomerListSerializer
 
 
 class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -72,6 +73,6 @@ class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         super(CustomerDetail, self).delete(request, args, kwargs)
-        response = {"status_code": status.HTTP_200_OK,
+        response = {"status_code": status.HTTP_204_NO_CONTENT,
                     "message": "Successfully deleted"}
         return Response(response)
