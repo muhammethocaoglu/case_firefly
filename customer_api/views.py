@@ -5,41 +5,67 @@ from rest_framework.response import Response
 from customer_api.serializer import CustomerSerializer
 from customer_api.serializer import CustomerListSerializer
 from customer_api.serializer import CustomerLoginSerializer
+from customer_api.serializer import CustomerRegisterSerializer
 
 import hashlib
 
 
+def retrieve_customer_by_email(given_email):
+    try:
+        customer = Customer.objects.get(email=given_email)
+    except Customer.DoesNotExist:
+        customer = None
+    return customer
+
+
+def generate_response(status_code, message, result):
+    response = {"status_code": status_code,
+                "message": message,
+                "result": result}
+    return Response(response)
+
+
+def generate_response_wout_result(status_code, message):
+    response = {"status_code": status_code,
+                "message": message}
+    return Response(response)
+
+
 class CustomerRegister(generics.CreateAPIView):
     queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
+    serializer_class = CustomerRegisterSerializer
 
     def create(self, request, *args, **kwargs):
-        super(CustomerRegister, self).create(request, args, kwargs)
-        response = {"status_code": status.HTTP_200_OK,
-                    "message": "Successfully created",
-                    "result": request.data}
-        return Response(response)
+        retrieved_customer = retrieve_customer_by_email(request.data['email'])
+        if retrieved_customer is not None:
+            return generate_response_wout_result(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                                 "Customer with given email already exists")
+        initial_response = super(CustomerRegister, self).create(request, args, kwargs)
+        return generate_response(initial_response.status_code, "Successfully created",
+                                 {"id": initial_response.data['id'],
+                                  "email": initial_response.data['email'],
+                                  "first_name": initial_response.data['first_name'],
+                                  "last_name": initial_response.data['last_name']})
 
 
 class CustomerLogin(generics.GenericAPIView):
     serializer_class = CustomerLoginSerializer
 
     def post(self, request, *args, **kwargs):
-        queryResultCustomerByEmail = Customer.objects.filter(email=request.data['email'])
-        if not queryResultCustomerByEmail.exists():
-            return Response({"detail": "Customer not found."}, status=status.HTTP_404_NOT_FOUND)
-        customerPasswordHashed = queryResultCustomerByEmail[0].password
+        query_result_customer_by_email = retrieve_customer_by_email(request.data['email'])
+        if query_result_customer_by_email is None:
+            return generate_response_wout_result(status.HTTP_404_NOT_FOUND,
+                                                 'Customer with email {} not found'.format(request.data['email']))
+        customer_password_hashed = query_result_customer_by_email.password
 
-        encrypter = hashlib.md5()
-        encrypter.update(request.data['password'].encode("utf-8"))
-        passwordInRequestHashed = encrypter.hexdigest()
+        encryptor = hashlib.md5()
+        encryptor.update(request.data['password'].encode("utf-8"))
+        password_in_request_hashed = encryptor.hexdigest()
 
-        if customerPasswordHashed != passwordInRequestHashed:
-            return Response({"detail": "Customer is unauthorized."}, status=status.HTTP_401_UNAUTHORIZED)
+        if customer_password_hashed != password_in_request_hashed:
+            return generate_response_wout_result(status.HTTP_401_UNAUTHORIZED, "Wrong password!")
 
-        response = {"status_code": status.HTTP_200_OK,
-                    "message": "Successfully logged in"}
-        return Response(response)
+        return generate_response(status.HTTP_200_OK, "Successfully logged in")
 
 
 class CustomerList(generics.ListAPIView):
@@ -56,23 +82,15 @@ class CustomerDetail(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
-        response = {"status_code": status.HTTP_200_OK,
-                    "message": "Successfully retrieved",
-                    "result": data}
-        return Response(response)
+        return generate_response(status.HTTP_200_OK, "Successfully retrieved", data)
 
     def patch(self, request, *args, **kwargs):
         super(CustomerDetail, self).patch(request, args, kwargs)
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         data = serializer.data
-        response = {"status_code": status.HTTP_200_OK,
-                    "message": "Successfully updated",
-                    "result": data}
-        return Response(response)
+        return generate_response(status.HTTP_200_OK, "Successfully updated", data)
 
     def delete(self, request, *args, **kwargs):
         super(CustomerDetail, self).delete(request, args, kwargs)
-        response = {"status_code": status.HTTP_204_NO_CONTENT,
-                    "message": "Successfully deleted"}
-        return Response(response)
+        return generate_response_wout_result(status.HTTP_204_NO_CONTENT, "Successfully deleted")
