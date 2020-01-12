@@ -1,8 +1,9 @@
-from django.urls import include, path
-from django.contrib import admin
-from .api import router
+from django.urls import path
+from customer_api import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include(router.urls)),
+    path('api/v1/customers/', views.CustomerList.as_view()),
+    path('api/v1/customers/register/', views.CustomerRegister.as_view()),
+    path('api/v1/customers/login/', views.CustomerLogin.as_view()),
+    path('api/v1/customers/<int:pk>/', views.CustomerDetail.as_view())
 ]
