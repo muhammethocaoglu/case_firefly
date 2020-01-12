@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from . import models
-import hashlib
+from customer_api.utilities import HashStringGenerator
 
 
 class CustomerRegisterSerializer(serializers.ModelSerializer):
@@ -9,11 +9,7 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        encrypter = hashlib.md5()
-        encrypter.update(validated_data['password'].encode("utf-8"))
-        passwordHash = encrypter.hexdigest()
-
-        validated_data['password'] = passwordHash
+        validated_data['password'] = HashStringGenerator.generate(validated_data['password'])
         return models.Customer.objects.create(**validated_data)
 
 

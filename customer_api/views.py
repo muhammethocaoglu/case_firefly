@@ -1,15 +1,13 @@
 from customer_api.models import Customer
 from rest_framework import generics, status
 from django.http import Http404
-from django.core.exceptions import ValidationError
 
 from customer_api.serializer import CustomerSerializer
 from customer_api.serializer import CustomerListSerializer
 from customer_api.serializer import CustomerLoginSerializer
 from customer_api.serializer import CustomerRegisterSerializer
-from customer_api.responsegenerator import ResponseGenerator
-
-import hashlib
+from customer_api.utilities import ResponseGenerator
+from customer_api.utilities import HashStringGenerator
 
 
 def retrieve_customer_by_email(given_email):
@@ -47,13 +45,9 @@ class CustomerLogin(generics.GenericAPIView):
             return ResponseGenerator.generate_without_body(status.HTTP_404_NOT_FOUND,
                                                            'Customer with email {} not found'.format(
                                                                request.data['email']))
-        customer_password_hashed = query_result_customer_by_email.password
 
-        encryptor = hashlib.md5()
-        encryptor.update(request.data['password'].encode("utf-8"))
-        password_in_request_hashed = encryptor.hexdigest()
-
-        if customer_password_hashed != password_in_request_hashed:
+        password_in_request_hashed = HashStringGenerator.generate(request.data['password'])
+        if query_result_customer_by_email.password != password_in_request_hashed:
             return ResponseGenerator.generate_without_body(status.HTTP_401_UNAUTHORIZED, "Wrong password!")
 
         return ResponseGenerator.generate_without_body(status.HTTP_200_OK, "Successfully logged in")
