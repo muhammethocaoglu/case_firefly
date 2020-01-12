@@ -1,6 +1,6 @@
 **Customer Api**
 
-It is implemented using Django rest framework since
+It is implemented using Django rest framework. Django was selected due to its environment enabling more rapid development with built-in ORM support. Embedded database SQLite3 was used in implementation.
 
 **How to run:**
 
