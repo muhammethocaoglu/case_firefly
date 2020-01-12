@@ -39,7 +39,7 @@ class CustomerRegister(generics.CreateAPIView):
         retrieved_customer = retrieve_customer_by_email(request.data['email'])
         if retrieved_customer is not None:
             return generate_response_wout_result(status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                                 "Customer with given email already exists")
+                                                 'Customer with email -{}- already exists'.format(request.data['email']))
         initial_response = super(CustomerRegister, self).create(request, args, kwargs)
         return generate_response(initial_response.status_code, "Successfully created",
                                  {"id": initial_response.data['id'],
@@ -55,7 +55,7 @@ class CustomerLogin(generics.GenericAPIView):
         query_result_customer_by_email = retrieve_customer_by_email(request.data['email'])
         if query_result_customer_by_email is None:
             return generate_response_wout_result(status.HTTP_404_NOT_FOUND,
-                                                 'Customer with email {} not found'.format(request.data['email']))
+                                                 'Customer with email -{}- not found'.format(request.data['email']))
         customer_password_hashed = query_result_customer_by_email.password
 
         encryptor = hashlib.md5()
