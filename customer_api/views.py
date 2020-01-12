@@ -65,7 +65,7 @@ class CustomerLogin(generics.GenericAPIView):
         if customer_password_hashed != password_in_request_hashed:
             return generate_response_wout_result(status.HTTP_401_UNAUTHORIZED, "Wrong password!")
 
-        return generate_response(status.HTTP_200_OK, "Successfully logged in")
+        return generate_response_wout_result(status.HTTP_200_OK, "Successfully logged in")
 
 
 class CustomerList(generics.ListAPIView):
