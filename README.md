@@ -1,8 +1,8 @@
-#Customer Api
+# Customer Api
 
 It is implemented using Django rest framework. Django was selected due to its environment enabling more rapid development with built-in ORM support. Embedded database SQLite3 was used in implementation.
 
-##How to run:
+## How to run:
 
 In order to run it, following commands should be run in terminal: 
 
@@ -12,7 +12,7 @@ python manage.py migrate
 
 python manage.py runserver
 
-##REST endpoints:
+## REST endpoints:
 
 Login (POST): Gets email and password fields in request body, and returns SUCCESS if there is a matching password for given e-mail.
 
@@ -26,7 +26,7 @@ Delete (DELETE): Deletes customer with id given in path
 
 Retrieve (GET): Retrieves customer with id given in path
 
-##Running customer app in Docker:
+## Running customer app in Docker:
 
 Following commands should be run in terminal:
 
